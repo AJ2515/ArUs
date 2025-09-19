@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AR Video Player - With Mute Button</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      /* Style for the UI container and button */
+      #ar-ui-container {
+        position: fixed;
+        bottom: 20px;
+        left: 20px; /* Positioned on the bottom-left */
+        z-index: 100;
+      }
+
+      #mute-button {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- 1. The UI Button (HTML) -->
+    <div id="ar-ui-container">
+      <button id="mute-button">🔇</button>
+    </div>
+
+    <a-scene mindar-image="imageTargetSrc: minds/targetss.mind; maxTrack: 8; autoStart: true;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: true" device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <video id="video" src="videos/video.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video1" src="videos/video1.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video2" src="videos/video2.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video3" src="videos/video3.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video4" src="videos/video4.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video5" src="videos/video5.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video6" src="videos/video6.mp4" loop="true" playsinline webkit-playsinline></video>
+        <video id="video7" src="videos/video7.mp4" loop="true" playsinline webkit-playsinline></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Remember to adjust width/height to match your image shapes! -->
+      <a-entity mindar-image-target="targetIndex: 0"><a-video src="#video" width="1" height="1.35"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 1"><a-video src="#video1" width="1" height="1.78"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 2"><a-video src="#video2" width="1" height="1.35"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 3"><a-video src="#video3" width="1" height="1.35"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 4"><a-video src="#video4" width="1" height="1.35"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 5"><a-video src="#video5" width="1" height="1.78"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 6"><a-video src="#video6" width="1" height="1.35"></a-video></a-entity>
+      <a-entity mindar-image-target="targetIndex: 7"><a-video src="#video7" width="1" height="1.35"></a-video></a-entity>
+    </a-scene>
+
+    <!-- 2. The Updated JavaScript Logic -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const allTargets = document.querySelectorAll('a-entity[mindar-image-target]');
+        const muteButton = document.getElementById('mute-button');
+        const allVideos = document.querySelectorAll('video');
+
+        // --- Mute/Unmute Logic ---
+        let isMuted = true; // Start muted
+
+        // Ensure all videos start muted, which is required by some browsers for autoplay
+        allVideos.forEach(video => {
+          video.muted = true;
+        });
+
+        muteButton.addEventListener('click', () => {
+          isMuted = !isMuted; // Toggle the state
+          muteButton.textContent = isMuted ? '🔇' : '🔊'; // Update the button icon
+
+          // Apply the mute state to any video that might currently be playing
+          allTargets.forEach(target => {
+            if (target.object3D.visible) {
+              const video = document.querySelector(target.querySelector('a-video').getAttribute('src'));
+              if (video) video.muted = isMuted;
+            }
+          });
+        });
+
+        // --- Target Detection Logic ---
+        allTargets.forEach(target => {
+          const videoSelector = target.querySelector('a-video').getAttribute('src');
+          const video = document.querySelector(videoSelector);
+
+          target.addEventListener("targetFound", event => {
+            // When a video is about to play, check our global `isMuted` state first
+            video.muted = isMuted; 
+            video.play();
+          });
+
+          target.addEventListener("targetLost", event => {
+            video.pause();
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

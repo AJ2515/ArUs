@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Story - Interactive Journey</title>
+    
+    <!-- Import Google Fonts for romantic typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif; /* Main font for content */
+            background: linear-gradient(135deg, #1a0d2b 0%, #3b0a2c 100%); /* Romantic gradient background */
+            min-height: 100vh;
+            overflow: hidden;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none; /* Important for mobile dragging */
+        }
+        
+        /* ===== MAIN CONTAINER STRUCTURE ===== */
+        #landing-page {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+            overflow: hidden;
+        }
+        
+        /* Background image with gradient overlay */
+        #background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(27, 10, 43, 0.8), rgba(59, 10, 44, 0.8)), 
+                        url('https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transition: all 1s ease; /* Smooth transition for parallax effect */
+        }
+        
+        /* Dark overlay for better text readability */
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(27, 10, 43, 0.9) 70%);
+            z-index: 1;
+        }
+        
+        /* Container for all floating interactive elements */
+        #animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none; /* Allows clicks to pass through to elements below */
+        }
+        
+        /* Content area with title, subtitle and button */
+        #content-container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 2rem;
+            text-align: center;
+            margin: 0 1rem; /* Responsive margin */
+        }
+        
+        /* ===== TYPOGRAPHY STYLES ===== */
+        .title {
+            font-family: 'Great Vibes', cursive; /* Romantic cursive font */
+            font-size: clamp(3.5rem, 8vw, 5.5rem); /* Responsive font size */
+            color: #ff7bac; /* Romantic pink color */
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(255, 123, 172, 0.5); /* Glowing effect */
+            animation: pulse 4s infinite; /* Pulsing animation */
+        }
+        
+        .subtitle {
+            font-size: clamp(1rem, 4vw, 1.5rem); /* Responsive font size */
+            margin-bottom: 2.5rem;
+            color: #e0c6ff; /* Light purple color */
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        /* ===== BUTTON STYLES ===== */
+        #start-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff7bac, #d83f87); /* Romantic gradient */
+            color: white;
+            font-size: clamp(1rem, 4vw, 1.3rem); /* Responsive font size */
+            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(216, 63, 135, 0.4); /* Soft shadow */
+            transition: all 0.3s ease; /* Smooth hover transition */
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 4;
+        }
+        
+        #start-button:hover {
+            transform: translateY(-5px); /* Lift effect on hover */
+            box-shadow: 0 12px 30px rgba(216, 63, 135, 0.6); /* Enhanced shadow on hover */
+        }
+        
+        /* ===== FLOATING ELEMENTS STYLES ===== */
+        .flying-element {
+            position: absolute;
+            will-change: transform; /* Optimizes animations */
+            user-select: none; /* Prevent text selection */
+            -webkit-user-select: none;
+            pointer-events: auto; /* Make elements clickable/draggable */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 5;
+        }
+        
+        /* Quote styling */
+        .flying-quote {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffd9ea; /* Light pink text */
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-style: italic;
+            font-size: clamp(0.9rem, 3vw, 1.1rem); /* Responsive font size */
+            cursor: grab; /* Indicates draggable element */
+            max-width: 250px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            touch-action: none; /* Essential for mobile dragging */
+        }
+        
+        /* Visual feedback when dragging */
+        .flying-quote:active {
+            cursor: grabbing;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
+            z-index: 100; /* Bring to front when dragging */
+        }
+        
+        /* Heart styling */
+        .flying-heart {
+            font-size: clamp(1.5rem, 4vw, 2rem); /* Responsive size */
+            color: #ff7bac; /* Romantic pink */
+            text-shadow: 0 0 15px rgba(255, 123, 172, 0.7); /* Glow effect */
+            cursor: pointer;
+            transition: all 0.5s ease;
+            touch-action: none; /* Essential for mobile dragging */
+        }
+        
+        /* Heart interaction feedback */
+        .flying-heart:active {
+            transform: scale(1.5); /* Grow on touch/click */
+            color: #ff4d94; /* Change color */
+        }
+        
+        /* Photo styling */
+        .flying-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            touch-action: none; /* Essential for mobile dragging */
+        }
+        
+        /* Photo interaction feedback */
+        .flying-photo:active {
+            transform: scale(1.1); /* Slightly enlarge */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 123, 172, 0.6); /* Pink border */
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        /* Floating animation for elements */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(2deg); /* Gentle floating motion */
+            }
+        }
+        
+        /* Pulsing animation for title */
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 20px rgba(255, 123, 172, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(255, 123, 172, 0.8), 0 0 60px rgba(255, 123, 172, 0.6);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(255, 123, 172, 0.5);
+            }
+        }
+        
+        /* Apply pulsing animation to hearts */
+        .heart-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Apply floating animation to elements */
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* ===== FALLING HEARTS CONTAINER ===== */
+        .hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allow clicks to pass through */
+            z-index: 0; /* Behind interactive elements */
+        }
+        
+        /* Individual falling heart */
+        .falling-heart {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #ff7bac;
+            opacity: 0;
+            top: -50px;
+            animation: falling linear forwards; /* Falling animation */
+        }
+        
+        /* Falling animation keyframes */
+        @keyframes falling {
+            to {
+                transform: translateY(100vh) rotate(360deg); /* Move down and rotate */
+                opacity: 0.7; /* Fade in slightly */
+            }
+        }
+        
+        /* ===== MOBILE OPTIMIZATIONS ===== */
+        @media (max-width: 768px) {
+            #content-container {
+                padding: 1rem; /* Less padding on small screens */
+            }
+            
+            #start-button {
+                padding: 0.8rem 1.8rem; /* Slightly smaller button */
+            }
+            
+            .flying-quote {
+                max-width: 180px; /* Smaller quotes on mobile */
+                padding: 12px 15px; /* Adjusted padding */
+            }
+            
+            .flying-photo {
+                width: 80px; /* Smaller photos on mobile */
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for the entire page -->
+    <div id="landing-page">
+        <!-- Background container with romantic image -->
+        <div id="background-container"></div>
+        
+        <!-- Dark overlay for better text contrast -->
+        <div id="overlay"></div>
+        
+        <!-- Container for all floating interactive elements -->
+        <div id="animation-container"></div>
+        
+        <!-- Container for falling hearts in background -->
+        <div id="hearts-container"></div>
+        
+        <!-- Main content area -->
+        <div id="content-container">
+            <h1 class="title">Hi Love</h1>
+            <p class="subtitle">Every moment with you is a page in our beautiful love story. Let's journey through our memories together...</p>
+            <a id="start-button" href="./main.html">Begin Our Journey</a>
+        </div>
+    </div>
+
+    <script>
+        // Main script that runs when the page is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get references to DOM elements
+            const animationContainer = document.getElementById('animation-container');
+            const heartsContainer = document.getElementById('hearts-container');
+            const backgroundContainer = document.getElementById('background-container');
+            
+            // Romantic content - limited to 5 quotes for mobile
+            const content = {
+                quotes: [
+                    "You are my today and all of my tomorrows",
+                    "To the world you may be one person, but to me you are the world",
+                    "My heart is and always will be yours",
+                    "Every love story is beautiful, but ours is my favorite",
+                    "Together with you is my favorite place to be",
+                    "You're my favorite place to go when my mind wanders",
+                    "I love you more than yesterday, less than tomorrow",
+                    "Your soul shines brighter than any star in sky",
+                    "In your smile, I see something more beautiful than moonlight",
+                    "Home isn't a place, it's wherever I'm with you",
+                    "Every heartbeat whispers your name when we're apart",
+                    "Your love is the compass that guides my heart",
+                    "Two souls, one heartbeat dancing through life together",
+                    "Your laughter is my favorite melody in life's symphony",
+                    "I choose you today, tomorrow, and all forevers",
+                    "Your eyes hold galaxies I'll forever explore happily",
+                    "We fit together like puzzle pieces meant to connect",
+                    "Your hand in mine feels like coming home always",
+                    "Love isn't finding perfection, but embracing beautiful imperfections",
+                    "Your voice is my favorite sound in this universe",
+                    "With you, ordinary moments become extraordinary memories cherished",
+                    "Your love lights up my darkest nights like sunshine",
+                    "My favorite adventure will always be loving you",
+                    "You're the missing piece I never knew I needed",
+                    "Our love story is my favorite tale to live",
+                    "Your warmth beside me is my perfect sanctuary",
+                    "Every 'I love you' carries my whole heart",
+                    "Your kindness makes my soul feel safe always",
+                    "Falling for you was gravity I'll never resist",
+                    "Your love colors my world in vibrant hues",
+                    "With you, forever feels like not enough time",
+                    "Your heartbeat against mine is my favorite rhythm",
+                    "Love is hearing 'me too' without speaking aloud",
+                    "Your presence makes my soul feel understood completely",
+                    "We're written in constellations across eternity's sky",
+                    "Aapki muskurahat meri subah ki pehli kiran hai",
+                    "Aapse milkar laga jaise dil ko mila apna ghar",
+                    "Aapke saath har pal ek naya geet ban jata hai",
+                    "Aapki aankhon mein dooba toh wahan sitaaron ka desh mila",
+                    "Aapke bina har saans adhuri si lagti hai",
+                    "Aap hi ho woh aasman jismein meri udaan hai",
+                    "Aapse pyaar karna meri sabse khoobsurat aadat hai",
+                    "Aapki yaadon mein khoya rehna mera sabse pyara lamha hai",
+                    "Aapka haath tham kar chalna meri manzil ban gaya",
+                    "Aap hi ho woh geet jo mere dil mein gaata hai",
+                    "Aapse milne ki aas har pal meri dua ban jati hai",
+                    "Aapki chup bhi meri zubaan se zyada kehti hai",
+                    "Aapke saath guzara har pal zindagi ka tohfa hai",
+                    "Aap hi ho woh khwaab jo haqeeqat ban gaye",
+                    "Aapse pyaar karna jaise khoobsoorat saaz bajana",
+                    "Aapki har saans meri dhadkanon ka raag ban jati hai",
+                    "Aapke bina har rang adhoora sa lagta hai",
+                    "Aap hi ho meri thakan ka sukoon, meri raat ki chandni",
+                    "Aapse pyaar woh baat hai jo shabdon se pare hai",
+                    "Aapki har ada meri zindagi ka nagma ban gayi",
+                    "Aapse mil kar laga jaise zindagi mili nayi",
+                    "Aap hi ho woh jazbaat jo shayari ban gaye",
+                    "Aapke saath guzara har lamha ek kahaani ban gaya",
+                    "Aapki har baat mere dil ki zubaan ban gayi",
+                    "Aapse mohabbat jaise phoolon ki khushboo barasna",
+                    "Aap hi ho meri subah ka suraj, raat ka chaand",
+                    "Aapke bina har khushi adhoori si lagti hai",
+                    "Aapse pyaar woh darya hai jo kabhi sookhta nahi",
+                    "Aapki yaadon ka guldasta mere dil mein saja hai",
+                    "Aap hi ho meri duniya ka sabse khoobsurat sach",
+                ],
+                // Sample images (replace with your own)
+                photos: [
+                    //'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80',
+                    'images/IMG_1021.jpg',
+                    'images/IMG_1171.jpg',
+                    'images/IMG_1375.jpg',
+                    'images/IMG_3205.jpg',
+                    'images/IMG_3409.jpg',
+                    'images/IMG_3533.jpg',
+                    'images/IMG_3615.jpg',
+                    'images/IMG_3624.jpg',
+                    'images/IMG_3645.jpg',
+                    'images/IMG_3920.jpg',
+                    'images/IMG_4540.jpg',
+                    'images/IMG_4591.jpg',
+                    'images/IMG_4788.jpg',
+                    'images/IMG_5829.jpg',
+                    'images/IMG_5844.jpg',
+                    'images/IMG_6248.jpg',
+                    'images/IMG_6274.jpg',
+                    'images/IMG_7832.jpg',
+                    'images/IMG_7986.jpg',
+                    'images/IMG_8302.jpg',
+                    ]
+            };
+            
+            // Create falling hearts in background
+            function createFallingHearts() {
+                setInterval(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('falling-heart');
+                    heart.innerHTML = '❤️';
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                    heart.style.fontSize = (Math.random() * 10 + 20) + 'px';
+                    heart.style.opacity = Math.random() * 0.5 + 0.3;
+                    
+                    heartsContainer.appendChild(heart);
+                    
+                    // Remove heart after animation completes
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 10000); // removes heart every 10 sec
+                }, 100); // Create a new heart every 300ms
+            }
+            
+            // Create flying elements (quotes, hearts, photos)
+            function createFlyingElement(type) {
+                const el = document.createElement('div');
+                el.classList.add('flying-element');
+                
+                if (type === 'quote') {
+                    // Create quote element
+                    el.classList.add('flying-quote');
+                    el.textContent = content.quotes[Math.floor(Math.random() * content.quotes.length)];
+                    el.classList.add('floating');
+                    
+                    // Position with boundaries to stay on screen
+                    const maxLeft = window.innerWidth - 250;
+                    const maxTop = window.innerHeight - 100;
+                    el.style.left = Math.max(10, Math.min(maxLeft, Math.random() * maxLeft)) + 'px';
+                    el.style.top = Math.max(10, Math.min(maxTop, Math.random() * maxTop)) + 'px';
+                    
+                    // Make draggable
+                    makeDraggable(el);
+                } 
+                else if (type === 'heart') {
+                    // Create heart element
+                    el.classList.add('flying-heart');
+                    el.innerHTML = '❤️';
+                    el.classList.add('heart-pulse');
+                    
+                    // Position with boundaries
+                    el.style.left = Math.max(20, Math.min(window.innerWidth - 60, Math.random() * (window.innerWidth - 40))) + 'px';
+                    el.style.top = Math.max(20, Math.min(window.innerHeight - 60, Math.random() * (window.innerHeight - 40))) + 'px';
+                    
+                    // Make draggable
+                    makeDraggable(el);
+                    
+                    // Click effect
+                    el.addEventListener('click', function() {
+                        this.style.transform = 'scale(1.5)';
+                        this.style.opacity = '0.8';
+                        
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                            this.style.opacity = '1';
+                        }, 500);
+                    });
+                }
+                else if (type === 'photo') {
+                    // Create photo element
+                    el.classList.add('flying-photo');
+                    el.style.backgroundImage = `url(${content.photos[Math.floor(Math.random() * content.photos.length)]})`;
+                    el.classList.add('floating');
+                    
+                    // Position with boundaries
+                    const maxLeft = window.innerWidth - 110;
+                    const maxTop = window.innerHeight - 110;
+                    el.style.left = Math.max(10, Math.min(maxLeft, Math.random() * maxLeft)) + 'px';
+                    el.style.top = Math.max(10, Math.min(maxTop, Math.random() * maxTop)) + 'px';
+                    
+                    // Make draggable
+                    makeDraggable(el);
+                    
+                    // Click effect
+                    el.addEventListener('click', function() {
+                        this.style.border = '3px solid #ff7bac';
+                        this.style.boxShadow = '0 0 20px rgba(255, 123, 172, 0.7)';
+                        
+                        setTimeout(() => {
+                            this.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+                            this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+                        }, 1500);
+                    });
+                }
+                
+                // Add to container
+                animationContainer.appendChild(el);
+            }
+            
+            // Make elements draggable
+            function makeDraggable(element) {
+                let startX = 0, startY = 0;
+                let initialX = 0, initialY = 0;
+                let isDragging = false;
+                let originalPosition = '';
+
+                // Store original position value
+                originalPosition = window.getComputedStyle(element).position;
+
+                element.addEventListener('mousedown', dragMouseDown);
+                element.addEventListener('touchstart', dragTouchDown, { passive: false });
+
+                function dragMouseDown(e) {
+                    startDrag(e.clientX, e.clientY);
+                    document.addEventListener('mousemove', elementDrag);
+                    document.addEventListener('mouseup', closeDragElement);
+                }
+
+                function dragTouchDown(e) {
+                    const touch = e.touches[0];
+                    startDrag(touch.clientX, touch.clientY);
+                    document.addEventListener('touchmove', elementTouchDrag, { passive: false });
+                    document.addEventListener('touchend', closeDragElement);
+                }
+
+                function startDrag(clientX, clientY) {
+                    isDragging = true;
+                    startX = clientX;
+                    startY = clientY;
+                    
+                    const rect = element.getBoundingClientRect();
+                    initialX = rect.left + window.scrollX;
+                    initialY = rect.top + window.scrollY;
+                    
+                    element.style.position = "absolute";
+                    element.style.left = initialX + "px";
+                    element.style.top = initialY + "px";
+                    element.style.zIndex = "9999";
+                    element.style.touchAction = "none"; // Prevent browser touch gestures
+                }
+
+                function setElementPosition(x, y) {
+                    // Calculate boundaries
+                    const minX = window.scrollX;
+                    const minY = window.scrollY;
+                    const maxX = window.innerWidth + window.scrollX - element.offsetWidth;
+                    const maxY = window.innerHeight + window.scrollY - element.offsetHeight;
+
+                    // Apply boundaries
+                    const boundedX = Math.max(minX, Math.min(x, maxX));
+                    const boundedY = Math.max(minY, Math.min(y, maxY));
+
+                    element.style.left = boundedX + "px";
+                    element.style.top = boundedY + "px";
+                }
+
+                function elementDrag(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    setElementPosition(initialX + dx, initialY + dy);
+                }
+
+                function elementTouchDrag(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const dx = touch.clientX - startX;
+                    const dy = touch.clientY - startY;
+                    setElementPosition(initialX + dx, initialY + dy);
+                }
+
+                function closeDragElement() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', elementDrag);
+                    document.removeEventListener('touchmove', elementTouchDrag);
+                    document.removeEventListener('mouseup', closeDragElement);
+                    document.removeEventListener('touchend', closeDragElement);
+                    element.style.zIndex = "";
+                    element.style.touchAction = "";
+                    
+                    // Reset position if original was static
+                    if (originalPosition === 'static') {
+                        element.style.position = '';
+                        element.style.left = '';
+                        element.style.top = '';
+                    }
+                }
+            }
+
+            
+            // Initialize floating elements
+            function initializeFloatingElements() {
+                const quoteCount = 3;
+                const heartCount = 5;
+                const photoCount = 3;
+                // Create quotes
+                for (let i = 0; i < quoteCount; i++) {
+                    createFlyingElement('quote');
+                }
+                
+                // Create hearts
+                for (let i = 0; i < heartCount; i++) {
+                    createFlyingElement('heart');
+                }
+                
+                // Create photos
+                for (let i = 0; i < photoCount; i++) {
+                    createFlyingElement('photo');
+                }
+            }
+            
+            // Create falling hearts in background
+            createFallingHearts();
+            
+            // Initialize floating elements
+            initializeFloatingElements();
+            
+            // Background parallax effect
+            document.addEventListener('mousemove', function(e) {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                // Move background slightly based on mouse position
+                backgroundContainer.style.transform = 
+                    `scale(1.05) translate(${x * 10 - 5}px, ${y * 10 - 5}px)`;
+            });
+            
+            // Prevent accidental zooming on mobile
+            document.addEventListener('touchmove', function(e) {
+                if (e.scale !== 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
+    </script>
+</body>
+</html>
